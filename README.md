@@ -16,7 +16,7 @@ Ti servono un account Google per amministrare Firebase, i due account Google che
 
 Mantieni Firebase sul piano **Spark**, GitHub sul piano Free e, se lo desideri, Cloudflare Workers sul piano Free. Non attivare Blaze, fatturazione, Storage o servizi a pagamento. Le quote gratuite non sono illimitate: se le esaurisci il servizio può rifiutare operazioni; Wishly mostra un errore invece di dichiarare il salvataggio riuscito. Non c'è un servizio che garantisca disponibilità illimitata a costo zero.
 
-Per lavorare sul computer: installa Node.js 22.18 o successivo (LTS) e un editor di testo. GitHub Desktop è un'alternativa semplice alla riga di comando per caricare i file. Java 21 serve solo se vuoi eseguire i test delle regole in locale.
+Per lavorare sul computer: installa Node.js 24 o successivo (LTS) e un editor di testo. GitHub Desktop è un'alternativa semplice alla riga di comando per caricare i file. Java 21 serve solo se vuoi eseguire i test delle regole in locale.
 
 ## 1. Crea Firebase gratuito
 
