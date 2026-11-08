@@ -4,6 +4,12 @@ Un'app privata per due persone, progettata per smartphone. React + TypeScript + 
 
 **Il codice è completo, ma per usarlo devi collegare il tuo progetto Firebase e pubblicarlo.** Non sono stati creati account o servizi esterni a tuo nome. Senza configurazione, Wishly mostra la schermata iniziale con le istruzioni; non finge di salvare dati.
 
+## Repository di questo progetto
+
+Il repository è [TommasoFerraris05/Wishly](https://github.com/TommasoFerraris05/Wishly). Il percorso GitHub Pages è **`/Wishly/`**, con W maiuscola. I file devono restare nelle cartelle indicate: `src`, `public`, `worker`, `tests` e `.github/workflows`.
+
+Per attivare il database mancano i quattro valori Web Firebase e i due UID: segui i punti 1–6 e 9. Nelle impostazioni Pages scegli **GitHub Actions**, poi esegui il workflow. Non caricare credenziali amministrative o backup nel repository.
+
 ## Prima di iniziare
 
 Ti servono un account Google per amministrare Firebase, i due account Google che useranno Wishly e un account GitHub. Per la pubblicazione gratuita su GitHub Pages, il repository deve essere **pubblico**: il codice e la pagina di accesso sono visibili, ma le wishlist sono protette dalle regole Firestore. Il link da solo non concede l'accesso ai dati.
@@ -75,7 +81,7 @@ VITE_FIREBASE_API_KEY=valore-apiKey
 VITE_FIREBASE_AUTH_DOMAIN=il-tuo-progetto.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=valore-projectId
 VITE_FIREBASE_APP_ID=valore-appId
-VITE_BASE_PATH=/wishly/
+VITE_BASE_PATH=/Wishly/
 VITE_METADATA_WORKER_URL=
 ```
 
@@ -85,7 +91,7 @@ Questi sono i parametri **Web** Firebase, non una chiave privata di servizio. No
 npm run dev
 ```
 
-Apri l'URL stampato nel terminale, includendo `/wishly/` se hai impostato quel percorso. Dopo ogni modifica a `.env`, riavvia il server. Per sviluppo locale aggiungi `localhost` tra i domini autorizzati Firebase. Se usi `127.0.0.1`, autorizza anche quello. Non aprire direttamente `index.html` con doppio clic.
+Apri l'URL stampato nel terminale, includendo `/Wishly/` se hai impostato quel percorso. Dopo ogni modifica a `.env`, riavvia il server. Per sviluppo locale aggiungi `localhost` tra i domini autorizzati Firebase. Se usi `127.0.0.1`, autorizza anche quello. Non aprire direttamente `index.html` con doppio clic.
 
 ## 7. Carica su GitHub
 
@@ -102,7 +108,7 @@ git init
 git add .
 git commit -m "Crea Wishly"
 git branch -M main
-git remote add origin https://github.com/TUO-UTENTE/wishly.git
+git remote add origin https://github.com/TommasoFerraris05/Wishly.git
 git push -u origin main
 ```
 
@@ -110,18 +116,18 @@ git push -u origin main
 
 1. Nel repository apri Settings → Secrets and variables → Actions → **Variables**.
 2. Crea le quattro variabili Firebase del punto 6 con gli stessi nomi e valori.
-3. Crea `VITE_BASE_PATH` con `/wishly/` se il repository si chiama `wishly`. Usa `/altro-nome/` se ha un altro nome. Per un repository `utente.github.io` usa `/`.
+3. Crea `VITE_BASE_PATH` con `/Wishly/` se il repository si chiama `wishly`. Usa `/altro-nome/` se ha un altro nome. Per un repository `utente.github.io` usa `/`.
 4. Lascia assente `VITE_METADATA_WORKER_URL` finché non configuri il Worker.
 5. Apri Settings → Pages → Build and deployment → Source: **GitHub Actions**.
 6. Apri Actions → “Pubblica Wishly su GitHub Pages” → Run workflow. Il workflow esegue i test, compila, genera la PWA e pubblica `dist`.
-7. Al completamento, Settings → Pages mostra l'indirizzo, normalmente `https://TUO-UTENTE.github.io/wishly/`.
+7. Al completamento, Settings → Pages mostra l'indirizzo, normalmente `https://TommasoFerraris05.github.io/Wishly/`.
 8. Se la prima esecuzione è partita prima di configurare le variabili, ripetila. Le variabili vengono lette durante la build: non basta cambiarle senza ricompilare.
 
 Le schermate sono gestite dentro l'app senza percorsi server: ricaricare non richiede regole di rewrite. Vite e la PWA usano il percorso di base, anche sotto `/nome-repository/`.
 
 ## 9. Autorizza il dominio di accesso
 
-In Firebase → Authentication → Impostazioni → Domini autorizzati, aggiungi `TUO-UTENTE.github.io` **senza** `https://` e senza `/wishly/`. Mantieni il dominio Firebase originale `progetto.firebaseapp.com`.
+In Firebase → Authentication → Impostazioni → Domini autorizzati, aggiungi `TommasoFerraris05.github.io` **senza** `https://` e senza `/Wishly/`. Mantieni il dominio Firebase originale `progetto.firebaseapp.com`.
 
 Il login usa `signInWithPopup` avviato direttamente dal tocco sul pulsante, una delle alternative ufficiali Firebase al redirect che può fallire con le restrizioni di archiviazione di terze parti. Non cambiare `authDomain` in `github.io`: GitHub Pages non ospita il gestore Firebase `/__/auth/handler`.
 
@@ -150,7 +156,7 @@ Per attivarlo:
 
 1. Crea un account Cloudflare sul piano Free, senza attivare Workers Paid o fatturazione.
 2. Apri `worker/wrangler.toml`.
-3. Imposta `FIREBASE_PROJECT_ID`, `ALLOWED_UIDS` (i due UID separati da virgola), `APP_ORIGIN` (es. `https://TUO-UTENTE.github.io`, senza percorso).
+3. Imposta `FIREBASE_PROJECT_ID`, `ALLOWED_UIDS` (i due UID separati da virgola), `APP_ORIGIN` (es. `https://TommasoFerraris05.github.io`, senza percorso).
 4. In `ALLOWED_HOSTS` mantieni solo gli host esatti dei negozi desiderati. `www.negozio.it` e `negozio.it` sono host distinti. Per Shopify aggiungi il dominio reale del negozio. Non aggiungere host arbitrari controllati da sconosciuti, domini locali o servizi di proxy.
 5. Il namespace del rate limiter `1001` deve essere distinto da altri rate limiter del tuo account se non vuoi condividere i contatori.
 6. Nel terminale:
