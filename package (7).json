@@ -1,0 +1,38 @@
+{
+  "name": "wishly",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "node --experimental-strip-types --test --test-isolation=none tests/model.test.ts",
+    "test:rules": "firebase emulators:exec --project demo-wishly --only firestore \"node --experimental-strip-types --test --test-isolation=none tests/rules.integration.ts\"",
+    "test:worker": "node --experimental-strip-types --test --test-isolation=none tests/worker.test.ts"
+  },
+  "dependencies": {
+    "@fontsource/manrope": "^5.3.0",
+    "firebase": "^12.0.0",
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "workbox-precaching": "^7.4.1",
+    "workbox-routing": "^7.4.1"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.0",
+    "@tailwindcss/vite": "^4.1.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "firebase-tools": "^14.0.0",
+    "tailwindcss": "^4.1.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.3.0",
+    "vite-plugin-pwa": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  }
+}

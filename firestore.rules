@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  // Sostituisci entrambi i valori con UID Firebase Authentication, mai con email.
+  function allowed() { return request.auth != null && request.auth.uid in ['REPLACE_UID_ONE', 'REPLACE_UID_TWO']; }
+  function text(v,n) { return v is string && v.size() <= n; }
+  function https(v) { return text(v,2048) && v.matches('https://[^ /]+[.][^ /]+.*'); }
+  function gift(d) {
+   return d.keys().hasAll(['owner','name','url','image','store','price','currency','priority','notes','createdAt','updatedAt','priceCheckedAt','priceSource','revision'])
+    && d.keys().hasOnly(['owner','name','url','image','store','price','currency','priority','notes','createdAt','updatedAt','priceCheckedAt','priceSource','revision'])
+    && d.owner in ['one','two'] && text(d.name,200) && d.name.size()>0
+    && https(d.url) && (d.image=='' || https(d.image)) && text(d.store,100)
+    && (d.price==null || (d.price is number && d.price>=0 && d.price<=1000000))
+    && d.currency in ['EUR','CHF','USD','GBP'] && d.priority is int && d.priority>=1 && d.priority<=10
+    && text(d.notes,4000) && d.createdAt is number && d.createdAt>0 && d.updatedAt is number && d.updatedAt>=d.createdAt
+    && ((d.price==null && d.priceSource==null && d.priceCheckedAt==null) || (d.price!=null && d.priceSource in ['automatic','manual'] && d.priceCheckedAt is number && d.priceCheckedAt>0))
+    && d.revision is int && d.revision>=1;
+  }
+  function profile(p) { return p.keys().hasOnly(['name','color','initial']) && p.keys().hasAll(['name','color','initial']) && text(p.name,40) && p.name.size()>0 && text(p.initial,2) && p.initial.size()>0 && p.color is string && p.color.matches('#[a-fA-F0-9]{6}'); }
+  match /gifts/{id} {
+   allow read: if allowed();
+   allow create: if allowed() && gift(request.resource.data) && request.resource.data.revision==1;
+   allow update: if allowed() && gift(request.resource.data) && request.resource.data.createdAt==resource.data.createdAt && request.resource.data.revision==resource.data.revision+1;
+   allow delete: if allowed();
+  }
+  match /settings/profiles {
+   allow read: if allowed();
+   allow create, update: if allowed() && request.resource.data.keys().hasOnly(['one','two','revision']) && profile(request.resource.data.one) && profile(request.resource.data.two) && request.resource.data.revision is int && ((!exists(/databases/$(database)/documents/settings/profiles) && request.resource.data.revision==1) || (exists(/databases/$(database)/documents/settings/profiles) && request.resource.data.revision==resource.data.revision+1));
+  }
+  match /{document=**} { allow read,write: if false; }
+ }
+}

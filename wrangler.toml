@@ -1,0 +1,13 @@
+name = "wishly-metadata"
+main = "src/index.ts"
+compatibility_date = "2025-10-01"
+[vars]
+FIREBASE_PROJECT_ID = "REPLACE_PROJECT_ID"
+ALLOWED_UIDS = "REPLACE_UID_ONE,REPLACE_UID_TWO"
+APP_ORIGIN = "https://REPLACE_USER.github.io"
+# Corrispondenza ESATTA: aggiungi esplicitamente i negozi e gli host dei redirect.
+ALLOWED_HOSTS = "www.amazon.it,amazon.it,www.zalando.it,www.sephora.it,www.ikea.com"
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "1001"
+simple = { limit = 10, period = 60 }
