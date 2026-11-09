@@ -4,6 +4,7 @@ import {
   useRef,
   useState,
   type FormEvent,
+  type ClipboardEvent as ReactClipboardEvent,
   type ReactNode,
 } from "react";
 import {
@@ -30,6 +31,8 @@ import {
   RefreshCw,
   WifiOff,
   ChevronRight,
+  ImagePlus,
+  ClipboardPaste,
 } from "lucide-react";
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
 import { onSnapshot, doc } from "firebase/firestore";
@@ -57,12 +60,15 @@ import {
   validateDraft,
   parseBackup,
   safeUrl,
+  isEmbeddedPhoto,
+  validPhoto,
   type Gift,
   type Draft,
   type ProfileId,
   type Profiles,
 } from "./model";
 import { metadata } from "./metadata";
+import { preparePhoto } from "./photo";
 const ids: ProfileId[] = ["one", "two"];
 function ProductImage({ src, name }: { src: string; name: string }) {
   const [failed, setFailed] = useState(false);
@@ -142,12 +148,13 @@ function GiftForm({
   const [d, setD] = useState<Draft>(initial);
   const [busy, setBusy] = useState(false);
   const [fetching, setFetching] = useState(false);
+  const [photoBusy, setPhotoBusy] = useState(false);
   const [error, setError] = useState("");
   const [hint, setHint] = useState("");
   const dirty = JSON.stringify(d) !== JSON.stringify(initial);
   async function close() {
     if (
-      !busy &&
+      !busy && !photoBusy &&
       (!dirty || (await confirm("Uscire senza salvare le modifiche?")))
     )
       onClose();
@@ -164,6 +171,27 @@ function GiftForm({
   }, [dirty]);
   function field<K extends keyof Draft>(k: K, v: Draft[K]) {
     setD((old) => ({ ...old, [k]: v }));
+  }
+  async function addPhoto(file?: File | null) {
+    if (!file) return;
+    setError("");
+    setPhotoBusy(true);
+    try {
+      const compact = await preparePhoto(file);
+      field("image", compact);
+      setHint("Fotografia pronta: è stata ridotta per salvare spazio e si sincronizzerà tra i due telefoni.");
+    } catch (e) {
+      setError(friendly(e));
+    } finally {
+      setPhotoBusy(false);
+    }
+  }
+  function pastePhoto(e: ReactClipboardEvent<HTMLTextAreaElement>) {
+    e.preventDefault();
+    const file = Array.from(e.clipboardData.items)
+      .find((item) => item.type.startsWith("image/"))?.getAsFile();
+    if (file) void addPhoto(file);
+    else setHint("Negli appunti non c'è una foto. Puoi selezionarla dalla galleria oppure incollare il suo link qui sotto.");
   }
   async function find() {
     if (!safeUrl(d.url)) {
@@ -242,7 +270,7 @@ function GiftForm({
       onClose={close}
     >
       <form onSubmit={submit}>
-        <fieldset disabled={busy || fetching}>
+        <fieldset disabled={busy || fetching || photoBusy}>
           <p className="muted">
             Le cose belle iniziano con un piccolo desiderio.
           </p>
@@ -363,22 +391,74 @@ function GiftForm({
               placeholder="Nome del negozio"
             />
           </label>
-          <label>
-            URL fotografia <span className="muted">· facoltativo</span>
-            <input
-              type="url"
-              inputMode="url"
-              value={d.image}
-              maxLength={2048}
-              placeholder="https://…"
-              onChange={(e) => field("image", e.target.value)}
-            />
-          </label>
-          {safeUrl(d.image) && (
-            <div className="small-preview">
-              <ProductImage src={d.image} name={d.name} />
+          <section className="photo-editor" aria-label="Fotografia del regalo">
+            <div className="photo-editor-title">
+              <div>
+                <strong>Fotografia del regalo</strong>
+                <span className="muted"> · facoltativa</span>
+              </div>
+              {isEmbeddedPhoto(d.image) && (
+                <span className="photo-status"><Check size={14} /> Foto salvabile</span>
+              )}
             </div>
-          )}
+            <div className="photo-choices">
+              <label className="secondary photo-file">
+                <ImagePlus size={18} />
+                Scegli dalla galleria
+                <input
+                  type="file"
+                  accept="image/*,.heic,.heif"
+                  aria-label="Scegli una fotografia dalla galleria del telefono"
+                  onChange={(e) => {
+                    void addPhoto(e.target.files?.[0]);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            </div>
+            <label className="photo-paste-label" htmlFor="photo-paste">
+              <ClipboardPaste size={17} />
+              Oppure incolla qui una fotografia
+            </label>
+            <textarea
+              id="photo-paste"
+              className="photo-paste-input"
+              rows={1}
+              placeholder="Tocca qui e scegli Incolla, oppure usa Ctrl+V"
+              aria-label="Incolla una fotografia dagli appunti"
+              onPaste={pastePhoto}
+              onChange={(e) => { e.target.value = ""; }}
+            />
+            <label className="photo-url-label">
+              Oppure incolla un link immagine
+              <input
+                type="url"
+                inputMode="url"
+                value={isEmbeddedPhoto(d.image) ? "" : d.image}
+                maxLength={2048}
+                placeholder="https://…"
+                onChange={(e) => field("image", e.target.value)}
+              />
+            </label>
+            {d.image && validPhoto(d.image) && (
+              <div className="photo-preview">
+                <div className="small-preview">
+                  <ProductImage src={d.image} name={d.name || "Anteprima del regalo"} />
+                </div>
+                <button
+                  type="button"
+                  className="photo-remove"
+                  onClick={() => field("image", "")}
+                >
+                  <X size={15} /> Rimuovi foto
+                </button>
+              </div>
+            )}
+            <p className="photo-help">
+              Le foto dalla galleria vengono ridotte automaticamente e salvate
+              nella vostra wishlist privata, senza servizi a pagamento.
+            </p>
+          </section>
           <div className="priority-box">
             <div>
               <label htmlFor="priority">Quanto lo desideri?</label>
@@ -423,13 +503,13 @@ function GiftForm({
             >
               Annulla
             </button>
-            <button className="primary" disabled={busy || fetching}>
+            <button className="primary" disabled={busy || fetching || photoBusy}>
               {busy ? (
                 <RefreshCw className="spin" size={18} />
               ) : (
                 <Check size={18} />
               )}{" "}
-              {busy ? "Salvataggio…" : "Salva desiderio"}
+              {photoBusy ? "Preparo la foto…" : busy ? "Salvataggio…" : "Salva desiderio"}
             </button>
           </div>
         </fieldset>
