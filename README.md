@@ -178,9 +178,24 @@ Estrae Open Graph, JSON-LD Product/Offer e metadati prezzo. Non esegue JavaScrip
 
 Non viene indovinato un prezzo da stringhe ambigue o da “prezzi a partire da”. Le valute supportate sono EUR, CHF, USD e GBP. Ogni dato recuperato è modificabile. Se la lettura fallisce, continua manualmente. “Aggiorna dati prodotto” richiede conferma prima di sostituire i campi esistenti; mantiene quelli non recuperati.
 
+## Fotografie dalla galleria o dagli appunti (senza costi extra)
+
+Nella schermata **Aggiungi / Modifica desiderio**, alla voce **Fotografia del regalo**, puoi:
+- premere **Scegli dalla galleria** su iPhone o Android;
+- toccare il campo **Incolla una fotografia** e incollare un'immagine copiata, se il browser la mette a disposizione negli appunti (su computer funziona anche Ctrl+V);
+- incollare un URL HTTPS nel campo **Link immagine**.
+
+L'immagine scelta viene ridimensionata automaticamente nel browser e trasformata in una miniatura WebP (o JPEG quando WebP non è disponibile), con un massimo di circa 90 KiB. Invece di pagare un servizio di upload, Wishly salva la foto compressa direttamente nel campo `image` del regalo su Firestore. Questo è adatto a una **piccola app privata per due persone**, non a una galleria con migliaia di fotografie. Le foto restano nei documenti privati delle wishlist e si sincronizzano sui due telefoni.
+
+**Configurazione obbligatoria per le foto locali:** dopo aver aggiornato GitHub, apri Firebase → Firestore Database → **Regole** e pubblica la versione aggiornata di `firestore.rules` dal repository. Le vecchie regole accettavano soltanto URL HTTPS: senza questo passaggio il salvataggio delle foto locali verrà rifiutato. **Non cambiare** il piano Spark e non attivare Firebase Storage o Blaze.
+
+Limitazioni: le immagini molto grandi o alcuni formati HEIC/HEIF non decodificati dal browser potrebbero richiedere di selezionare una versione JPG/PNG. Per mantenere gratuito il database vengono ridotte le dimensioni e quindi la qualità rispetto all'originale. Un'immagine copiata dal web potrebbe contenere solo un collegamento, non un file effettivo: in questo caso incolla l'URL nel campo apposito.
+
+I backup JSON includono anche le miniature incorporate. Il file da reimportare non deve superare 8 MB; per wishlist molto grandi con tante foto potrebbe essere necessario gestire le immagini separatamente. L'esportazione non è limitata dal client.
+
 ## Backup e condivisione
 
-Impostazioni → Esporta crea un JSON privato dei regali, con data, identificativi e prezzi. Conservalo fuori dal repository pubblico. Importa accetta formato Wishly v1, massimo 4 MB e 400 regali; verifica i dati, chiede conferma e salta duplicati per ID o coppia wishlist+URL. Non sovrascrive regali esistenti. Le preferenze dei profili non sono incluse nel backup.
+Impostazioni → Esporta crea un JSON privato dei regali, con data, identificativi e prezzi. Conservalo fuori dal repository pubblico. Importa accetta formato Wishly v1, massimo 8 MB e 400 regali; verifica i dati, chiede conferma e salta duplicati per ID o coppia wishlist+URL. Non sovrascrive regali esistenti. Le preferenze dei profili non sono incluse nel backup.
 
 WhatsApp prepara un messaggio con il link del **negozio**: scegli tu il destinatario e conferma l'invio in WhatsApp. L'app non invia messaggi autonomamente e non condivide accesso al database. “Copia link” copia solo il prodotto.
 
