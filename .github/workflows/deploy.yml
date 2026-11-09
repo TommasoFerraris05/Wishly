@@ -23,6 +23,11 @@ jobs:
       - run: npm ci
       - name: Controlla vulnerabilita delle dipendenze web
         run: npm audit --omit=dev --audit-level=high
+      - name: Rapporto audit strumenti di sviluppo (solo informativo)
+        run: |
+          npm audit --json > npm-audit.json || true
+          node -e 'const a=require("./npm-audit.json"); for(const [name,v] of Object.entries(a.vulnerabilities||{})) if(["high","critical"].includes(v.severity)) console.log(v.severity+": "+name+" "+v.range+" fix="+JSON.stringify(v.fixAvailable));'
+          rm -f npm-audit.json
       - run: npm test
       - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
         with:
