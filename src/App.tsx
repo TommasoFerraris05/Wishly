@@ -504,7 +504,7 @@ function GiftForm({
               Annulla
             </button>
             <button className="primary" disabled={busy || fetching || photoBusy}>
-              {busy ? (
+              {busy || photoBusy ? (
                 <RefreshCw className="spin" size={18} />
               ) : (
                 <Check size={18} />
@@ -1254,8 +1254,8 @@ function Preferences({
   async function importBackup(file?: File) {
     if (!file) return;
     try {
-      if (file.size > 4 * 1024 * 1024)
-        throw Error("Il file è troppo grande (massimo 4 MB).");
+      if (file.size > 8 * 1024 * 1024)
+        throw Error("Il file è troppo grande (massimo 8 MB).");
       const parsed = parseBackup(await file.text()),
         known = new Set(gifts.map((g) => g.id)),
         urls = new Set(gifts.map((g) => g.owner + "|" + g.url)),
