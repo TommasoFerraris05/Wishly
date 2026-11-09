@@ -14,6 +14,8 @@ import {
   blank,
   toDraft,
   safeUrl,
+  isEmbeddedPhoto,
+  validPhoto,
   validateDraft,
   sorted,
   shareText,
@@ -48,6 +50,16 @@ describe("URL e dati", () => {
     ])
       expect(safeUrl(u)).toBe(false);
     expect(safeUrl("https://www.ikea.com/it/it/p/test")).toBe(true);
+  });
+  it("accetta foto compatte e link esterni senza autorizzare HTML o payload enormi", () => {
+    const photo = "data:image/webp;base64,UklGRhQAAABXRUJQVlA4";
+    expect(isEmbeddedPhoto(photo)).toBe(true);
+    expect(validPhoto(photo)).toBe(true);
+    expect(validateDraft({ ...gift("foto", null), image: photo })).toBeNull();
+    expect(validPhoto("https://example.com/foto.webp")).toBe(true);
+    expect(validPhoto("data:text/html;base64,PGh0bWw+")).toBe(false);
+    expect(validPhoto("data:image/webp;base64," + "A".repeat(126000))).toBe(false);
+    expect(validPhoto("javascript:alert(1)")).toBe(false);
   });
   it("accetta un regalo senza prezzo e priorità 9", () =>
     expect(validateDraft(gift("a", null, 9))).toBeNull());
