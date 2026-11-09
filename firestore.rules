@@ -5,11 +5,15 @@ service cloud.firestore {
   function allowed() { return request.auth != null && request.auth.uid in ['cshLPSHZysSyc0qdzbOD2q5TgDH3', 'n6IXfEbgDiOrOGeZxtYQyqnOIPs2']; }
   function text(v,n) { return v is string && v.size() <= n; }
   function https(v) { return text(v,2048) && v.matches('https://[^ /]+[.][^ /]+.*'); }
+  function photo(v) {
+    return v=='' || https(v) ||
+      (text(v,125000) && v.matches('data:image/(webp|jpeg|png);base64,[A-Za-z0-9+/=]+'));
+  }
   function gift(d) {
    return d.keys().hasAll(['owner','name','url','image','store','price','currency','priority','notes','createdAt','updatedAt','priceCheckedAt','priceSource','revision'])
     && d.keys().hasOnly(['owner','name','url','image','store','price','currency','priority','notes','createdAt','updatedAt','priceCheckedAt','priceSource','revision'])
     && d.owner in ['one','two'] && text(d.name,200) && d.name.size()>0
-    && https(d.url) && (d.image=='' || https(d.image)) && text(d.store,100)
+    && https(d.url) && photo(d.image) && text(d.store,100)
     && (d.price==null || (d.price is number && d.price>=0 && d.price<=1000000))
     && d.currency in ['EUR','CHF','USD','GBP'] && d.priority is int && d.priority>=1 && d.priority<=10
     && text(d.notes,4000) && d.createdAt is number && d.createdAt>0 && d.updatedAt is number && d.updatedAt>=d.createdAt
