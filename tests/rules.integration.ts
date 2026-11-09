@@ -72,8 +72,8 @@ describe("Privacy Firestore", () => {
     }
   });
   it("consente ai due UID e blocca dati malformati e revisioni obsolete", async () => {
-    const a = env.authenticatedContext("REPLACE_UID_ONE").firestore(),
-      b = env.authenticatedContext("REPLACE_UID_TWO").firestore();
+    const a = env.authenticatedContext("cshLPSHZysSyc0qdzbOD2q5TgDH3").firestore(),
+      b = env.authenticatedContext("n6IXfEbgDiOrOGeZxtYQyqnOIPs2").firestore();
     await assertSucceeds(setDoc(doc(a, "gifts", "ok"), data));
     await assertSucceeds(getDoc(doc(b, "gifts", "ok")));
     await assertSucceeds(
@@ -85,6 +85,24 @@ describe("Privacy Firestore", () => {
     await assertFails(
       updateDoc(doc(a, "gifts", "ok"), { priority: 11, revision: 3 }),
     );
+    await assertSucceeds(
+      setDoc(doc(a, "gifts", "photo"), {
+        ...data,
+        image: "data:image/webp;base64,UklGRhQAAABXRUJQVlA4",
+      }),
+    );
+    await assertFails(
+      setDoc(doc(a, "gifts", "invalid-photo"), {
+        ...data,
+        image: "data:text/html;base64,PGh0bWw+",
+      }),
+    );
+    await assertFails(
+      setDoc(doc(a, "gifts", "oversize-photo"), {
+        ...data,
+        image: "data:image/webp;base64," + "A".repeat(126000),
+      }),
+    );
     await assertFails(
       setDoc(doc(a, "gifts", "extra"), { ...data, admin: true }),
     );
@@ -93,7 +111,7 @@ describe("Privacy Firestore", () => {
     );
   });
   it("autorizza profili validi senza aprire altri documenti", async () => {
-    const a = env.authenticatedContext("REPLACE_UID_ONE").firestore();
+    const a = env.authenticatedContext("cshLPSHZysSyc0qdzbOD2q5TgDH3").firestore();
     await assertSucceeds(
       setDoc(doc(a, "settings", "profiles"), {
         one: { name: "Tommaso", color: "#173D35", initial: "T" },
@@ -113,8 +131,8 @@ describe("Privacy Firestore", () => {
 });
 
 it("sincronizza tra due client e rileva una revisione concorrente", async () => {
-  const a = env.authenticatedContext("REPLACE_UID_ONE").firestore(),
-    b = env.authenticatedContext("REPLACE_UID_TWO").firestore();
+  const a = env.authenticatedContext("cshLPSHZysSyc0qdzbOD2q5TgDH3").firestore(),
+    b = env.authenticatedContext("n6IXfEbgDiOrOGeZxtYQyqnOIPs2").firestore();
   const ra = doc(a, "gifts", "realtime"),
     rb = doc(b, "gifts", "realtime");
   await setDoc(ra, data);
