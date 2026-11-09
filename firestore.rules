@@ -2,7 +2,7 @@ rules_version = '2';
 service cloud.firestore {
  match /databases/{database}/documents {
   // Sostituisci entrambi i valori con UID Firebase Authentication, mai con email.
-  function allowed() { return request.auth != null && request.auth.uid in ['REPLACE_UID_ONE', 'REPLACE_UID_TWO']; }
+  function allowed() { return request.auth != null && request.auth.uid in ['cshLPSHZysSyc0qdzbOD2q5TgDH3', 'n6IXfEbgDiOrOGeZxtYQyqnOIPs2']; }
   function text(v,n) { return v is string && v.size() <= n; }
   function https(v) { return text(v,2048) && v.matches('https://[^ /]+[.][^ /]+.*'); }
   function gift(d) {
