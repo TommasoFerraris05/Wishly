@@ -1,4 +1,14 @@
 export type ProfileId = "one" | "two";
+export const MAX_IMAGE_DATA_LENGTH = 125000; // circa 90 KiB di foto compressa per regalo
+export function isEmbeddedPhoto(value: string): boolean {
+  return (
+    value.length <= MAX_IMAGE_DATA_LENGTH &&
+    /^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/=]+$/.test(value)
+  );
+}
+export function validPhoto(value: string): boolean {
+  return value === "" || (value.length <= 2048 && safeUrl(value)) || isEmbeddedPhoto(value);
+}
 export interface Profile {
   name: string;
   color: string;
@@ -66,8 +76,8 @@ export function validateDraft(d: Draft): string | null {
     return "Inserisci un link HTTPS valido a un negozio.";
   if (!d.name.trim() || d.name.length > 200)
     return "Inserisci un nome (massimo 200 caratteri).";
-  if (!safeUrl(d.image, true) || d.image.length > 2048)
-    return "La fotografia deve avere un URL HTTPS valido.";
+  if (!validPhoto(d.image))
+    return "Usa un URL immagine HTTPS oppure una foto caricata dalla galleria (dimensione ridotta).";
   if (!["one", "two"].includes(d.owner)) return "Wishlist non valida.";
   if (!Number.isInteger(d.priority) || d.priority < 1 || d.priority > 10)
     return "Scegli un desiderio da 1 a 10.";
